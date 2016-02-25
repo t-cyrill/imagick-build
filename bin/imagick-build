@@ -1,0 +1,136 @@
+#!/usr/bin/env ruby
+#
+# Usage: imagick-build --definitions
+
+require 'optparse'
+require 'fileutils'
+
+IMAGICK_VERSION='20160225'
+
+# ---------------------------
+def print_definitions
+  puts 'Available versions:'
+  get_definitions.each do |k,v|
+    puts "  #{k}"
+  end
+end
+
+def get_definitions
+  {
+    '6.9.3-5'           => 'd3c33b881f00b8708a1b2f2db9d5cc86e91f94e9',
+    '6.9.3-4'           => 'd21fb1eaf6e444ecd6228f2a58d6d0e24692f53f',
+    '6.9.3-3'           => 'dc70910b08c861775edeb2b27c1a9e75b6aa417a',
+    '6.9.3-2'           => 'f1292c008927c5b83b199a9c12b5d8568d1a18c4',
+    '6.9.3-1'           => '2d5e9a19845de23418e8e7a8c49141e24d2d37b0',
+    '6.9.3-0'           => '31160e362dc86ea3c45e3ea4f71a7131eafd8a2f',
+    '6.9.2-10'          => 'e31c09df6bdefea91652724fa6aa36a3c103553e',
+    '6.9.2-9'           => 'c7ee219cceab9a091731e9f7134c19c972364d88',
+    '6.9.2-9-20151218'  => '90962d3790152fe9f78e4f2a84c2e41211342b12',
+    '6.9.2-8'           => 'd6d677c068513708b3e54e7758b4b902cbadbf64',
+    '6.9.2-7'           => 'ca271bfa18a4cd0fb9bb8f32e7ecb1d2d127c5cb',
+    '6.9.2-6'           => '52d08285a1c59ed641499572bd61ea50fb8aef68',
+    '6.9.2-5'           => 'a0e3dbf241568a51c9b0fa8f8d72f21714996de8',
+    '6.9.2-4'           => 'b10ea36648dd5ad46e859e3fdce15150c5554c99',
+    '6.9.2-2'           => '8baf325d6ced5deb6f6e4f5c5a02e26f7bafbd4b',
+    '6.9.2-1'           => '2d9b50f80b176f5464f18e7abcdbf5bc85ed8506',
+    '6.9.2-0'           => '404a96c72e3a8bb99b6f9f2074a7035d068ad71b',
+  }
+end
+
+def workdir
+  "#{File.dirname(__dir__)}/tmp"
+end
+
+def build(version)
+  FileUtils.mkdir_p workdir unless File.exists? workdir
+  repo = ImagickRepository.new workdir
+  repo.clone unless repo.cloned?
+  repo.checkout get_definitions[version]
+  repo.build
+end
+
+def help
+  puts "usage: imagick-build [--definitions] [-i VERSION] [--prefix=#{ENV['HOME']}/ImageMagick]"
+end
+
+class ImagickRepository
+  URL = 'https://github.com/ImageMagick/ImageMagick.git'
+
+  def initialize(dir)
+    @dir = dir
+    @gitdir = "#{dir}/ImageMagick"
+  end
+
+  def cloned?
+    File.exists? @gitdir
+  end
+
+  def checkout(revision)
+    chdir(gitdir) do
+      pid = spawn  "git checkout #{revision}"
+      Process.waitpid pid
+    end
+  end
+
+  def clone
+    chdir(@dir) do
+      pid = spawn "git clone #{URL}"
+      Process.waitpid pid
+    end
+  end
+
+  def gitdir
+    @gitdir
+  end
+
+  def chdir(dir)
+    oldwd = Dir.getwd
+    Dir.chdir dir
+    yield
+    Dir.chdir oldwd
+  end
+
+  def build
+    chdir(gitdir) do
+      pid = spawn "./configure --prefix=/tmp/ImageMagick && make && make install"
+      Process.waitpid pid
+      #pid = spawn "make && make install"
+      #Process.waitpid pid
+    end
+  end
+end
+
+
+# ---------------------------
+
+options = {
+  prefix: "#{ENV['HOME']}/ImageMagick"
+}
+build_version = nil
+mode = :help
+
+opt = OptionParser.new
+opt.on('--prefix') do |v|
+  options[:prefix] = v
+end
+
+opt.on('--definitions') do
+  mode = :print_definitions
+end
+
+opt.on('-i') do |v|
+  mode = :install
+  build_version = v
+end
+
+opt.parse!(ARGV)
+
+case mode
+when :install
+  build(build_version, options)
+when :print_definitions
+  print_definitions
+else
+  help
+end
+exit
