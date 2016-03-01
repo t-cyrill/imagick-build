@@ -8,6 +8,13 @@ Compile and install different versions of ImageMagick on UNIX-like systems.
 * build-essentials
 * ... more?
 
+## Debian & Ubuntu
+
+```
+$ sudo apt-get install git build-essential
+$ sudo apt-get build-dep imagemagick
+```
+
 # Usage
 
 ## Show supported ImageMagick versions
@@ -23,20 +30,20 @@ imagick-build --definitions
 > ...
 ```
 
-## Install ImageMagick 6.9.3.0
+## Install ImageMagick 6.9.3-0
 
 ```
-imagick-build -i 6.9.3.0 --prefix=$HOME/ImageMagick
+imagick-build -i 6.9.3-0 --prefix=$HOME/ImageMagick
 ```
 
 ## Problems
 
-I cannot found release point before `6.9.1.0`🍜
+I cannot found release point before `6.9.1-0`🍜
 
 ## Releases
 
 ### 20160301
- * Support 6.9.1.x
+ * Support 6.9.1-x
  * --definitions read definitions.json
  * Sort definitions by release date
 
