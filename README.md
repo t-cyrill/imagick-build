@@ -4,6 +4,7 @@ Compile and install different versions of ImageMagick on UNIX-like systems.
 # Requires
 
 * Ruby > 2.0
+* git
 * build-essentials
 * ... more?
 
@@ -38,6 +39,7 @@ I cannot found release point before `6.9.1.0`🍜
  * Support 6.9.1.x
  * --definitions read definitions.json
  * Sort definitions by release date
+
 ### 20160225
  * Initial Commit
 
