@@ -30,7 +30,16 @@ imagick-build -i 6.9.3.0 --prefix=$HOME/ImageMagick
 
 ## Problems
 
-I cannot found release point before `6.9.2.0`🍜
+I cannot found release point before `6.9.1.0`🍜
+
+## Releases
+
+### 20160301
+ * Support 6.9.1.x
+ * --definitions read definitions.json
+ * Sort definitions by release date
+### 20160225
+ * Initial Commit
 
 ## Contributing
 

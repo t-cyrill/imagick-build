@@ -4,6 +4,7 @@
 
 require 'optparse'
 require 'fileutils'
+require 'json'
 
 IMAGICK_VERSION='20160225'
 
@@ -16,25 +17,9 @@ def print_definitions
 end
 
 def get_definitions
-  {
-    '6.9.3-5'           => 'd3c33b881f00b8708a1b2f2db9d5cc86e91f94e9',
-    '6.9.3-4'           => 'd21fb1eaf6e444ecd6228f2a58d6d0e24692f53f',
-    '6.9.3-3'           => 'dc70910b08c861775edeb2b27c1a9e75b6aa417a',
-    '6.9.3-2'           => 'f1292c008927c5b83b199a9c12b5d8568d1a18c4',
-    '6.9.3-1'           => '2d5e9a19845de23418e8e7a8c49141e24d2d37b0',
-    '6.9.3-0'           => '31160e362dc86ea3c45e3ea4f71a7131eafd8a2f',
-    '6.9.2-10'          => 'e31c09df6bdefea91652724fa6aa36a3c103553e',
-    '6.9.2-9'           => 'c7ee219cceab9a091731e9f7134c19c972364d88',
-    '6.9.2-9-20151218'  => '90962d3790152fe9f78e4f2a84c2e41211342b12',
-    '6.9.2-8'           => 'd6d677c068513708b3e54e7758b4b902cbadbf64',
-    '6.9.2-7'           => 'ca271bfa18a4cd0fb9bb8f32e7ecb1d2d127c5cb',
-    '6.9.2-6'           => '52d08285a1c59ed641499572bd61ea50fb8aef68',
-    '6.9.2-5'           => 'a0e3dbf241568a51c9b0fa8f8d72f21714996de8',
-    '6.9.2-4'           => 'b10ea36648dd5ad46e859e3fdce15150c5554c99',
-    '6.9.2-2'           => '8baf325d6ced5deb6f6e4f5c5a02e26f7bafbd4b',
-    '6.9.2-1'           => '2d9b50f80b176f5464f18e7abcdbf5bc85ed8506',
-    '6.9.2-0'           => '404a96c72e3a8bb99b6f9f2074a7035d068ad71b',
-  }
+  JSON.load(File.read("#{File.dirname(__dir__)}/definitions.json")).sort do |a, b|
+    b[0].split(/[^0-9]/).map(&:to_i) <=> a[0].split(/[^0-9]/).map(&:to_i)
+  end
 end
 
 def workdir
