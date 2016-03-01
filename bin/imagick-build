@@ -95,7 +95,7 @@ build_version = nil
 mode = :help
 
 opt = OptionParser.new
-opt.on('--prefix') do |v|
+opt.on('--prefix=PATH') do |v|
   options[:prefix] = v
 end
 
