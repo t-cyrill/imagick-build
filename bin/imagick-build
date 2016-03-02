@@ -57,37 +57,44 @@ class ImagickRepository
 
   def checkout(revision)
     chdir(gitdir) do
-      pid = spawn  "git checkout #{revision}"
-      Process.waitpid pid
+      command_wait "git checkout #{revision}"
     end
   end
 
   def clean(force: false)
     option = force ? '-df' : ''
     chdir(gitdir) do
-      pid = spawn  "git clean #{option}"
-      Process.waitpid pid
+      command_wait "git clean #{option}"
     end
   end
 
   def reset(revision: , hard: false)
     option = hard ? '--hard' : ''
     chdir(gitdir) do
-      pid = spawn  "git reset #{option} #{revision}"
-      Process.waitpid pid
+      command_wait "git reset #{option} #{revision}"
     end
   end
 
   def clone
     chdir(@dir) do
-      pid = spawn "git clone #{URL}"
-      Process.waitpid pid
+      command_wait "git clone #{URL}"
     end
   end
 
   def gitdir
     @gitdir
   end
+
+  def build(options)
+    options_s = ''
+    options_s << "--prefix=#{options[:prefix]}" if options[:prefix]
+    chdir(gitdir) do
+      command_wait "./configure #{options_s}"
+      command_wait "make && make install"
+    end
+  end
+
+  private
 
   def chdir(dir)
     oldwd = Dir.getwd
@@ -96,15 +103,9 @@ class ImagickRepository
     Dir.chdir oldwd
   end
 
-  def build(options)
-    options_s = ''
-    options_s << "--prefix=#{options[:prefix]}" if options[:prefix]
-    chdir(gitdir) do
-      pid = spawn "./configure #{options_s}"
-      Process.waitpid pid
-      pid = spawn "make && make install"
-      Process.waitpid pid
-    end
+  def command_wait(command)
+    pid = spawn(command)
+    Process.waitpid pid
   end
 end
 
