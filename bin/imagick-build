@@ -19,19 +19,20 @@ end
 def get_definitions
   JSON.load(File.read("#{File.dirname(__dir__)}/definitions.json")).sort do |a, b|
     b[0].split(/[^0-9]/).map(&:to_i) <=> a[0].split(/[^0-9]/).map(&:to_i)
-  end
+  end.to_h
 end
 
 def workdir
   "#{File.dirname(__dir__)}/tmp"
 end
 
-def build(version)
+def build(version, options)
   FileUtils.mkdir_p workdir unless File.exists? workdir
   repo = ImagickRepository.new workdir
   repo.clone unless repo.cloned?
+
   repo.checkout get_definitions[version]
-  repo.build
+  repo.build(options)
 end
 
 def help
@@ -75,12 +76,14 @@ class ImagickRepository
     Dir.chdir oldwd
   end
 
-  def build
+  def build(options)
+    options_s = ''
+    options_s << "--prefix=#{options[:prefix]}" if options[:prefix]
     chdir(gitdir) do
-      pid = spawn "./configure --prefix=/tmp/ImageMagick && make && make install"
+      pid = spawn "./configure #{options_s}"
       Process.waitpid pid
-      #pid = spawn "make && make install"
-      #Process.waitpid pid
+      pid = spawn "make && make install"
+      Process.waitpid pid
     end
   end
 end
@@ -103,7 +106,7 @@ opt.on('--definitions') do
   mode = :print_definitions
 end
 
-opt.on('-i') do |v|
+opt.on('-i=VERSION') do |v|
   mode = :install
   build_version = v
 end
