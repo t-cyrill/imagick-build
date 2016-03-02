@@ -30,8 +30,12 @@ def build(version, options)
   FileUtils.mkdir_p workdir unless File.exists? workdir
   repo = ImagickRepository.new workdir
   repo.clone unless repo.cloned?
+  repo.clean(force: true)
 
-  repo.checkout get_definitions[version]
+  revision = get_definitions[version]
+  repo.checkout revision
+  repo.reset(revision: 'HEAD', hard: true)
+  repo.clean(force: true)
   repo.build(options)
 end
 
@@ -54,6 +58,22 @@ class ImagickRepository
   def checkout(revision)
     chdir(gitdir) do
       pid = spawn  "git checkout #{revision}"
+      Process.waitpid pid
+    end
+  end
+
+  def clean(force: false)
+    option = force ? '-df' : ''
+    chdir(gitdir) do
+      pid = spawn  "git clean #{option}"
+      Process.waitpid pid
+    end
+  end
+
+  def reset(revision: , hard: false)
+    option = hard ? '--hard' : ''
+    chdir(gitdir) do
+      pid = spawn  "git reset #{option} #{revision}"
       Process.waitpid pid
     end
   end
