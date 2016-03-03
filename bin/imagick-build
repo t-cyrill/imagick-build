@@ -85,6 +85,10 @@ class ImagickRepository
     @gitdir
   end
 
+  def dir
+    @dir
+  end
+
   def build(options)
     options_s = ''
     options_s << "--prefix=#{options[:prefix]}" if options[:prefix]
