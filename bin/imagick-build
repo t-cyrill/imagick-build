@@ -40,7 +40,7 @@ def build(version, options)
 end
 
 def help
-  puts "usage: imagick-build [--definitions] [-i VERSION] [--prefix=#{ENV['HOME']}/ImageMagick]"
+  puts "usage: imagick-build [--definitions] [-i VERSION] [--parallels=1] [--prefix=#{ENV['HOME']}/ImageMagick]"
 end
 
 class ImagickRepository
@@ -53,6 +53,12 @@ class ImagickRepository
 
   def cloned?
     File.exists? @gitdir
+  end
+
+  def fetch
+    chdir(gitdir) do
+      command_wait "git fetch"
+    end
   end
 
   def checkout(revision)
@@ -90,7 +96,7 @@ class ImagickRepository
     options_s << "--prefix=#{options[:prefix]}" if options[:prefix]
     chdir(gitdir) do
       command_wait "./configure #{options_s}"
-      command_wait "make && make install"
+      command_wait "make -j#{options[:paralells]} && make install"
     end
   end
 
@@ -113,7 +119,8 @@ end
 # ---------------------------
 
 options = {
-  prefix: "#{ENV['HOME']}/ImageMagick"
+  prefix: "#{ENV['HOME']}/ImageMagick",
+  paralells: 1
 }
 build_version = nil
 mode = :help
@@ -125,6 +132,10 @@ end
 
 opt.on('--definitions') do
   mode = :print_definitions
+end
+
+opt.on('--paralells') do |v|
+  options[:paralells] = v.to_i
 end
 
 opt.on('-i=VERSION') do |v|
