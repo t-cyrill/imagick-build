@@ -138,7 +138,7 @@ opt.on('--definitions') do
   mode = :print_definitions
 end
 
-opt.on('--paralells') do |v|
+opt.on('--paralells=NUM') do |v|
   options[:paralells] = v.to_i
 end
 
