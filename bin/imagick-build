@@ -33,6 +33,10 @@ def build(version, options)
   repo.clean(force: true)
 
   revision = get_definitions[version]
+  unless revision
+    puts "Revision: #{version} is unknown."
+    exit
+  end
   repo.checkout revision
   repo.reset(revision: 'HEAD', hard: true)
   repo.clean(force: true)
